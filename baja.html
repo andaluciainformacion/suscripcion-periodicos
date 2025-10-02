@@ -52,7 +52,7 @@
       color: #333;
     }
     
-    .btn {
+    button {
       display: inline-block;
       background: #dc3545;
       color: white;
@@ -63,11 +63,10 @@
       font-size: 18px;
       font-weight: bold;
       margin: 20px 10px;
-      text-decoration: none;
       transition: all 0.3s;
     }
     
-    .btn:hover {
+    button:hover {
       background: #c82333;
       transform: translateY(-2px);
       box-shadow: 0 10px 20px rgba(220, 53, 69, 0.4);
@@ -79,6 +78,11 @@
     
     .btn-secondary:hover {
       background: #5a6268;
+    }
+    
+    a {
+      text-decoration: none;
+      color: white;
     }
     
     #resultado {
@@ -108,7 +112,59 @@
 </head>
 <body>
   <div class="container">
-    <h1>😢 ¿Deseas darte de baja?</h1>
+    <h1>¿Deseas darte de baja?</h1>
     <p>Lamentamos que quieras abandonarnos.</p>
     
-    <div class="
+    <div class="email-display" id="emailDisplay">
+      Cargando...
+    </div>
+    
+    <p>Si confirmas, dejarás de recibir los periódicos en tu correo electrónico.</p>
+    
+    <button onclick="confirmarBaja()">Confirmar Baja</button>
+    <button class="btn-secondary"><a href="https://andaluciainformacion.github.io/suscripcion-periodicos/">Cancelar</a></button>
+    
+    <div id="resultado"></div>
+    
+    <div class="footer">
+      <p>© Publicaciones del Sur, S.A.</p>
+    </div>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const email = urlParams.get('email');
+    
+    if (email) {
+      document.getElementById('emailDisplay').textContent = email;
+    } else {
+      document.getElementById('emailDisplay').textContent = 'Email no especificado';
+    }
+    
+    async function confirmarBaja() {
+      const resultado = document.getElementById('resultado');
+      resultado.textContent = 'Procesando...';
+      resultado.className = '';
+      
+      try {
+        const response = await fetch('https://ps01-n8n.k2oxnb.easypanel.host/webhook/baja-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: email })
+        });
+        
+        const data = await response.json();
+        
+        resultado.className = 'success';
+        resultado.innerHTML = '<h2>Baja confirmada</h2><p>Tu suscripción ha sido cancelada correctamente.</p><p>Ya no recibirás más periódicos.</p>';
+        
+        document.querySelectorAll('button').forEach(btn => btn.style.display = 'none');
+        
+      } catch (error) {
+        resultado.className = 'error';
+        resultado.textContent = 'Error al procesar la baja. Intenta de nuevo.';
+      }
+    }
+  </script>
+</body>
+</html>
